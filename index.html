@@ -317,6 +317,33 @@
     font-size: 0.95rem;
     max-width: 68ch;
   }
+  .project-visual{
+    margin-top: 16px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--ink-2);
+    max-width: 760px;
+  }
+  .project-visual img{
+    display: block;
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    background: var(--ink-2);
+  }
+  .project-visual-placeholder{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--ink-2), var(--ink-3));
+  }
   .project-meta{
     display: flex;
     gap: 18px;
@@ -537,6 +564,40 @@
     return div.innerHTML;
   }
 
+  function getRepoPreviewUrl(repo){
+    return repo.previewImage || '';
+  }
+
+  function sortImageCandidates(candidates){
+    return candidates.sort((a, b) => {
+      const aDepth = a.path.split('/').length;
+      const bDepth = b.path.split('/').length;
+      const aRank = a.path.toLowerCase().includes('images') || a.path.toLowerCase().includes('assets') || a.path.toLowerCase().includes('screenshots') ? 0 : 1;
+      const bRank = b.path.toLowerCase().includes('images') || b.path.toLowerCase().includes('assets') || b.path.toLowerCase().includes('screenshots') ? 0 : 1;
+
+      if (aRank !== bRank) return aRank - bRank;
+      return aDepth - bDepth;
+    });
+  }
+
+  function getImagePathFromTree(tree, repo){
+    const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+    const candidates = (tree || [])
+      .filter(item => item.type === 'blob')
+      .filter(item => {
+        const ext = item.path.split('.').pop()?.toLowerCase();
+        return imageExts.includes(ext);
+      });
+
+    const sortedCandidates = sortImageCandidates(candidates);
+    const preferred = sortedCandidates.find(item => item.path.toLowerCase().includes('images') || item.path.toLowerCase().includes('assets') || item.path.toLowerCase().includes('screenshots')) || sortedCandidates[0];
+
+    if (!preferred) return null;
+
+    const branch = repo.default_branch || 'main';
+    return `https://raw.githubusercontent.com/${USERNAME}/${repo.name}/${branch}/${preferred.path}`;
+  }
+
   function render(){
     let repos = allRepos.slice();
 
@@ -574,6 +635,7 @@
     const gis = isGisRepo(repo);
     const topics = (repo.topics || []).slice(0, 6)
       .map(t => `<span>${escapeHtml(t)}</span>`).join('');
+    const previewUrl = getRepoPreviewUrl(repo);
 
     return `
       <li class="project-card">
@@ -583,6 +645,9 @@
             <a href="${repo.html_url}" target="_blank" rel="noopener">${escapeHtml(repo.name)}</a>
             ${gis ? '<span class="gis-badge">GIS</span>' : ''}
           </h3>
+          ${previewUrl
+            ? `<div class="project-visual"><img src="${previewUrl}" alt="${escapeHtml(repo.name)} preview" loading="lazy"></div>`
+            : '<div class="project-visual-placeholder">No image found</div>'}
           <p class="project-desc">${repo.description ? escapeHtml(repo.description) : 'No description provided yet.'}</p>
           <div class="project-meta">
             ${repo.language ? `<span class="m-item"><span class="lang-dot" style="background:${langColor}"></span>${escapeHtml(repo.language)}</span>` : ''}
@@ -609,6 +674,30 @@
     });
   }
 
+  async function loadRepoImages(){
+    const reposWithoutImage = allRepos.filter(repo => !repo.previewImage);
+
+    for (const repo of reposWithoutImage) {
+      try {
+        const branch = repo.default_branch || 'main';
+        const treeRes = await fetch(`https://api.github.com/repos/${USERNAME}/${repo.name}/git/trees/${branch}?recursive=1`);
+
+        if (!treeRes.ok) continue;
+
+        const treeData = await treeRes.json();
+        const previewImage = getImagePathFromTree(treeData.tree || [], repo);
+
+        if (previewImage) {
+          repo.previewImage = previewImage;
+        }
+      } catch (err) {
+        console.warn(`Could not fetch preview for ${repo.name}:`, err);
+      }
+    }
+
+    render();
+  }
+
   async function loadRepos(){
     container.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
     try{
@@ -617,6 +706,7 @@
       const data = await res.json();
       allRepos = data.filter(r => !r.fork);
       render();
+      await loadRepoImages();
     }catch(err){
       console.error(err);
       showError();
