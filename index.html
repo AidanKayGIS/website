@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aidan Kay — GIS &amp; Spatial Analysis</title>
+<meta name="description" content="GIS and geospatial development portfolio of Aidan Kay, built from live GitHub project data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #0E1620;
+    --ink-2: #141F2C;
+    --ink-3: #1B2836;
+    --paper: #EDE6D6;
+    --contour: #4F7A5C;
+    --contour-dim: #35513E;
+    --amber: #C98A3E;
+    --slate: #7C93A8;
+    --text: #E7E2D3;
+    --text-dim: #93A0A9;
+    --line: rgba(231,226,211,0.12);
+    --max: 920px;
+    font-size: 16px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin:0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.55;
+  }
+
+  h1,h2,h3{
+    font-family: 'Spectral', serif;
+    font-weight: 500;
+    margin: 0;
+    color: var(--paper);
+  }
+
+  a{ color: inherit; }
+
+  :focus-visible{
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+  }
+
+  .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+  .wrap{
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- NAV ---------- */
+  header.site-nav{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(14,22,32,0.88);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner{
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .nav-mark{
+    font-family: 'Spectral', serif;
+    font-size: 1.05rem;
+    color: var(--paper);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .nav-mark span{ color: var(--amber); }
+  .nav-links{
+    display: flex;
+    gap: 24px;
+    list-style: none;
+    margin: 0; padding: 0;
+    font-size: 0.9rem;
+  }
+  .nav-links a{
+    text-decoration: none;
+    color: var(--text-dim);
+    transition: color .15s ease;
+  }
+  .nav-links a:hover{ color: var(--paper); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 88px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-contours{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .hero-contours path{
+    fill: none;
+    stroke: var(--contour-dim);
+    stroke-width: 1;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+    animation: draw 2.6s ease forwards;
+  }
+  .hero-contours path:nth-child(2){ animation-delay: .12s; stroke: var(--contour-dim); }
+  .hero-contours path:nth-child(3){ animation-delay: .24s; }
+  .hero-contours path:nth-child(4){ animation-delay: .36s; }
+  .hero-contours path:nth-child(5){ animation-delay: .48s; }
+  @keyframes draw{ to{ stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce){
+    .hero-contours path{ stroke-dashoffset: 0; animation: none; }
+  }
+
+  .hero-inner{ position: relative; z-index: 1; }
+  .hero-coord{
+    font-size: 0.8rem;
+    color: var(--slate);
+    margin-bottom: 18px;
+    display: inline-block;
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+  .hero h1{
+    font-size: clamp(2.1rem, 5vw, 3.4rem);
+    line-height: 1.1;
+    max-width: 14ch;
+  }
+  .hero .lede{
+    margin-top: 22px;
+    max-width: 52ch;
+    color: var(--text-dim);
+    font-size: 1.05rem;
+  }
+  .hero-actions{
+    margin-top: 34px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-size: 0.92rem;
+    border: 1px solid var(--line);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .btn-primary{
+    background: var(--contour);
+    border-color: var(--contour);
+    color: #0E1620;
+    font-weight: 500;
+  }
+  .btn-primary:hover{ background: #5B8C68; }
+  .btn-ghost{ color: var(--text-dim); }
+  .btn-ghost:hover{ border-color: var(--slate); color: var(--paper); }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding: 72px 0; }
+  .section-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .section-head h2{ font-size: 1.7rem; }
+  .section-ref{
+    font-size: 0.78rem;
+    color: var(--slate);
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+  }
+  .about-grid p{ color: var(--text-dim); }
+  .about-grid p + p{ margin-top: 14px; }
+  .legend{
+    list-style: none;
+    margin: 0; padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .legend li{
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+  }
+  .legend span:first-child{ color: var(--text-dim); }
+  .legend span:last-child{ color: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; }
+
+  @media (max-width: 720px){
+    .about-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- PROJECTS ---------- */
+  .controls{
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    align-items: center;
+  }
+  .controls input[type="search"]{
+    flex: 1;
+    min-width: 180px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 0.92rem;
+  }
+  .controls input[type="search"]::placeholder{ color: var(--text-dim); }
+  .toggle-group{
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .toggle-group button{
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .toggle-group button.active{
+    background: var(--contour);
+    color: #0E1620;
+    font-weight: 500;
+  }
+  select#sortSelect{
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 0.85rem;
+  }
+
+  .project-list{
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .project-card{
+    display: grid;
+    grid-template-columns: 4px 1fr;
+    gap: 20px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .project-bar{ border-radius: 2px; }
+  .project-body h3{
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .project-body h3 a{ text-decoration: none; }
+  .project-body h3 a:hover{ text-decoration: underline; text-decoration-color: var(--amber); }
+  .gis-badge{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.03em;
+  }
+  .project-desc{
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-size: 0.95rem;
+    max-width: 68ch;
+  }
+  .project-meta{
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--slate);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .project-meta .m-item{ display: flex; align-items: center; gap: 6px; }
+  .lang-dot{ width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .topics{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .topics span{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    border: 1px solid var(--line);
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .state-msg{
+    padding: 48px 0;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .state-msg .retry{
+    margin-top: 14px;
+    display: inline-block;
+  }
+  .skeleton{
+    height: 84px;
+    background: linear-gradient(90deg, var(--ink-2) 25%, var(--ink-3) 37%, var(--ink-2) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.6s ease infinite;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+  @keyframes shimmer{
+    0%{ background-position: 100% 0; }
+    100%{ background-position: 0 0; }
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top: 1px solid var(--line);
+    padding: 40px 0;
+  }
+  .footer-inner{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .footer-links{
+    display: flex;
+    gap: 18px;
+  }
+  .footer-links a{ text-decoration: none; color: var(--text-dim); }
+  .footer-links a:hover{ color: var(--paper); }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="nav-inner">
+    <a class="nav-mark" href="#top">Aidan Kay <span>·</span> GIS</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <svg class="hero-contours" viewBox="0 0 920 380" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M -20 60 C 150 20, 300 100, 460 60 S 780 20, 940 70" />
+      <path d="M -20 120 C 130 90, 320 170, 480 120 S 760 80, 940 140" />
+      <path d="M -20 190 C 160 150, 300 240, 500 190 S 800 150, 940 210" />
+      <path d="M -20 260 C 140 220, 330 300, 500 250 S 780 220, 940 280" />
+      <path d="M -20 330 C 150 300, 320 360, 490 320 S 790 300, 940 350" />
+    </svg>
+    <div class="wrap hero-inner">
+      <span class="hero-coord mono">51.6522° N · 0.0808° W — Enfield, UK</span>
+      <h1>Mapping problems before I solve them.</h1>
+      <p class="lede">I'm Aidan Kay, a GIS developer working across spatial analysis, cartography, and geospatial data pipelines. This page pulls straight from my GitHub — what's below is what I've actually shipped.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#projects">View projects</a>
+        <a class="btn btn-ghost" href="https://github.com/AidanKayGIs" target="_blank" rel="noopener">GitHub profile ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>About</h2>
+        <span class="section-ref mono">SEC. 01</span>
+      </div>
+      <div class="about-grid">
+        <div>
+          <p>I build tools that turn raw spatial data — satellite imagery, survey points, vector layers — into something people can actually use: maps, dashboards, and analysis pipelines. My work sits at the intersection of geography and software, usually somewhere between QGIS, Python, and a web map.</p>
+          <p>This site is intentionally minimal on hand-written claims. The project list below is fetched live from my GitHub account, so it stays current without me maintaining a second copy of my portfolio.</p>
+        </div>
+        <ul class="legend">
+          <li><span>Focus</span><span>Spatial analysis</span></li>
+          <li><span>Tools</span><span>QGIS · GDAL · PostGIS</span></li>
+          <li><span>Languages</span><span>Python · SQL · JS</span></li>
+          <li><span>Data</span><span>Raster / Vector</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Projects</h2>
+        <span class="section-ref mono" id="repoCount">SEC. 02</span>
+      </div>
+
+      <div class="controls">
+        <input type="search" id="searchInput" placeholder="Search projects by name or description…" aria-label="Search projects">
+        <div class="toggle-group" role="group" aria-label="Filter projects">
+          <button type="button" id="filterAll" class="active">All repos</button>
+          <button type="button" id="filterGis">GIS-tagged</button>
+        </div>
+        <select id="sortSelect" aria-label="Sort projects">
+          <option value="updated">Recently updated</option>
+          <option value="stars">Most starred</option>
+          <option value="name">Name (A–Z)</option>
+        </select>
+      </div>
+
+      <div id="projectContainer">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="contact">
+  <div class="wrap footer-inner">
+    <span>© <span id="year"></span> Aidan Kay — built from live GitHub data.</span>
+    <div class="footer-links">
+      <a href="https://github.com/AidanKayGIs" target="_blank" rel="noopener">GitHub</a>
+      <a href="#top">Back to top</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const USERNAME = 'AidanKayGIs';
+  const container = document.getElementById('projectContainer');
+  const repoCountEl = document.getElementById('repoCount');
+  const searchInput = document.getElementById('searchInput');
+  const filterAllBtn = document.getElementById('filterAll');
+  const filterGisBtn = document.getElementById('filterGis');
+  const sortSelect = document.getElementById('sortSelect');
+
+  const GIS_KEYWORDS = [
+    'gis','geospatial','geo','gdal','qgis','arcgis','leaflet','mapbox',
+    'geopandas','postgis','spatial','cartography','remote-sensing',
+    'raster','vector','shapefile','geojson','osm','openstreetmap',
+    'satellite','lidar','terrain','elevation','coordinate','projection'
+  ];
+
+  const LANG_COLORS = {
+    Python: '#3572A5', JavaScript: '#f1e05a', TypeScript: '#3178c6',
+    HTML: '#e34c26', CSS: '#563d7c', 'Jupyter Notebook': '#DA5B0B',
+    R: '#198CE7', Shell: '#89e051', Java: '#b07219', 'C++': '#f34b7d',
+    Go: '#00ADD8', Rust: '#dea584'
+  };
+
+  let allRepos = [];
+  let state = { filter: 'all', sort: 'updated', query: '' };
+
+  function isGisRepo(repo){
+    const haystack = [
+      repo.name, repo.description || '', ...(repo.topics || [])
+    ].join(' ').toLowerCase();
+    return GIS_KEYWORDS.some(k => haystack.includes(k));
+  }
+
+  function relativeTime(dateStr){
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days < 1) return 'today';
+    if (days === 1) return '1 day ago';
+    if (days < 30) return days + ' days ago';
+    const months = Math.floor(days / 30);
+    if (months < 12) return months + (months === 1 ? ' month ago' : ' months ago');
+    const years = Math.floor(months / 12);
+    return years + (years === 1 ? ' year ago' : ' years ago');
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function render(){
+    let repos = allRepos.slice();
+
+    if (state.filter === 'gis') repos = repos.filter(isGisRepo);
+
+    if (state.query.trim()){
+      const q = state.query.trim().toLowerCase();
+      repos = repos.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        (r.description || '').toLowerCase().includes(q)
+      );
+    }
+
+    repos.sort((a, b) => {
+      if (state.sort === 'stars') return b.stargazers_count - a.stargazers_count;
+      if (state.sort === 'name') return a.name.localeCompare(b.name);
+      return new Date(b.pushed_at) - new Date(a.pushed_at);
+    });
+
+    repoCountEl.textContent = repos.length + (repos.length === 1 ? ' REPO' : ' REPOS');
+
+    if (repos.length === 0){
+      container.innerHTML = `
+        <div class="state-msg">
+          No repositories match this view. Try clearing the search or switching back to "All repos".
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<ul class="project-list">${repos.map(repoCard).join('')}</ul>`;
+  }
+
+  function repoCard(repo){
+    const langColor = LANG_COLORS[repo.language] || '#7C93A8';
+    const gis = isGisRepo(repo);
+    const topics = (repo.topics || []).slice(0, 6)
+      .map(t => `<span>${escapeHtml(t)}</span>`).join('');
+
+    return `
+      <li class="project-card">
+        <div class="project-bar" style="background:${langColor}"></div>
+        <div class="project-body">
+          <h3>
+            <a href="${repo.html_url}" target="_blank" rel="noopener">${escapeHtml(repo.name)}</a>
+            ${gis ? '<span class="gis-badge">GIS</span>' : ''}
+          </h3>
+          <p class="project-desc">${repo.description ? escapeHtml(repo.description) : 'No description provided yet.'}</p>
+          <div class="project-meta">
+            ${repo.language ? `<span class="m-item"><span class="lang-dot" style="background:${langColor}"></span>${escapeHtml(repo.language)}</span>` : ''}
+            <span class="m-item">★ ${repo.stargazers_count}</span>
+            <span class="m-item">⑂ ${repo.forks_count}</span>
+            <span class="m-item">updated ${relativeTime(repo.pushed_at)}</span>
+            ${repo.homepage ? `<span class="m-item"><a href="${repo.homepage}" target="_blank" rel="noopener">live demo ↗</a></span>` : ''}
+          </div>
+          ${topics ? `<div class="topics">${topics}</div>` : ''}
+        </div>
+      </li>`;
+  }
+
+  function showError(){
+    container.innerHTML = `
+      <div class="state-msg">
+        Couldn't load repository data from GitHub. This can happen if the request was rate-limited or the network is unavailable.
+        <br>
+        <a class="btn btn-ghost retry" href="#" id="retryBtn">Retry</a>
+      </div>`;
+    document.getElementById('retryBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      loadRepos();
+    });
+  }
+
+  async function loadRepos(){
+    container.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
+    try{
+      const res = await fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=pushed`);
+      if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+      const data = await res.json();
+      allRepos = data.filter(r => !r.fork);
+      render();
+    }catch(err){
+      console.error(err);
+      showError();
+    }
+  }
+
+  filterAllBtn.addEventListener('click', () => {
+    state.filter = 'all';
+    filterAllBtn.classList.add('active');
+    filterGisBtn.classList.remove('active');
+    render();
+  });
+  filterGisBtn.addEventListener('click', () => {
+    state.filter = 'gis';
+    filterGisBtn.classList.add('active');
+    filterAllBtn.classList.remove('active');
+    render();
+  });
+  sortSelect.addEventListener('change', (e) => {
+    state.sort = e.target.value;
+    render();
+  });
+  searchInput.addEventListener('input', (e) => {
+    state.query = e.target.value;
+    render();
+  });
+
+  loadRepos();
+</script>
+
+</body>
+</html>
